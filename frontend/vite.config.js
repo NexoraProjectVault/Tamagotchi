@@ -10,5 +10,6 @@ export default defineConfig({
   },
   server: {
     middlewareMode: false,
+    allowedHosts: ['tamagotchi-69fg.onrender.com'],
   },
 })
