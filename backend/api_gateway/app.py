@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 import requests
 from config import Config
@@ -15,7 +15,16 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
     app.config.from_object(Config)
+
     app.register_blueprint(api_gateway)
+
+    @app.route("/")
+    def root():
+        return "🚀 API Gateway is running! Use /v1/ endpoints."
+    
+    @app.route("/favicon.ico")
+    def favicon():
+        return send_from_directory("static", "favicon.ico")
 
     @app.before_request
     def startup():
