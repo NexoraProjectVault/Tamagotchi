@@ -199,6 +199,9 @@ def proxy_tasks(endpoint):
     """Forward task service requests"""
     return proxy_request(Config.TASK_SERVICE_URL, endpoint, service_type='task')
 
+@api_gateway.route("/")
+def home():
+    return "API-GATEWAY"
 
 def proxy_request(service_url, endpoint, service_type='default'):
     """
