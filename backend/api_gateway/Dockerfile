@@ -10,4 +10,7 @@ COPY . .
 
 EXPOSE 5000
 ENV PYTHONUNBUFFERED=1
+
+ENV PYTHONPATH=/app:/app/shared
+
 CMD ["python", "app.py"]
