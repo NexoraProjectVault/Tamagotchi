@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Task CRUD Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial; max-width: 860px; margin: 24px auto; padding: 0 12px; }
+    h1 { margin: 0 0 16px; }
+    form, .toolbar { display: grid; grid-template-columns: 1fr 1fr 160px; gap: 8px; margin: 12px 0; }
+    input, select, button, textarea { padding: 8px; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 8px; text-align: left; vertical-align: top; }
+    code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+    .muted { color: #6b7280; }
+    .row-btns button { margin-right: 6px; }
+  </style>
+</head>
+
+
+
+<body>
+  <h1>Task CRUD Demo</h1>
+
+ 
+<div class="toolbar">
+  <select id="filter">
+    <option value="">All statuses</option>
+    <option value="todo">todo</option>
+    <option value="in_progress">in_progress</option>
+    <option value="done">done</option>
+  </select>
+
+  <select id="tagFilter">
+    <option value="">All types</option>
+  </select>
+  <select id="sort">
+    <option value="-id">Sort: newest</option>
+    <option value="title">Sort: title</option>
+    <option value="priority">Sort: priority</option>
+    <option value="tag">Sort: type/tag</option>
+    <option value="due_at">Sort: due_at</option>
+  </select>
+
+  <button onclick="loadTasks()">Refresh</button>
+  <div>
+    <button id="btnAll">All</button>
+    <button id="btnTrash">🗑️ Trash</button>
+  </div>
+  <div class="muted">API base: <code id="base"></code></div>
+</div>
+
+<form id="createForm" onsubmit="createTask(event)">
+  <input id="title" placeholder="Title *" required />
+  <input id="due" type="datetime-local" placeholder="Due (optional)" />
+  <select id="priority">
+    <option value="normal">normal</option>
+    <option value="low">low</option>
+    <option value="high">high</option>
+  </select>
+  <input id="points" type="number" min="0" step="1" placeholder="Points" />
+  <button type="submit">Create</button>
+</form>
+<textarea id="desc" rows="2" placeholder="Description (optional)"></textarea>
+<label>
+  Task type:
+  <select id="tags">
+    <option value="feeding">feeding</option>
+    <option value="cleaning">cleaning</option>
+    <option value="playing">playing</option>
+  </select>
+</label>
+
+
+<table id="tbl">
+  <thead>
+    <tr>
+      <th>ID</th><th>Title</th><th>Status</th><th>Priority</th>
+      <th>Due</th><th>Points</th><th>Type</th><th>Deleted?</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const API_BASE = (localStorage.getItem('API_BASE') || (window.location.origin + "/api/v1")).replace(/\/$/,'');
+document.getElementById('base').textContent = API_BASE;
+
+
+let currentView = 'all';
+
+
+const btnAll = document.getElementById('btnAll');
+const btnTrash = document.getElementById('btnTrash');
+const tagFilterEl = document.getElementById('tagFilter');
+const sortEl = document.getElementById('sort');
+
+if (btnAll) btnAll.addEventListener('click', () => { currentView = 'all'; loadTasks(); });
+if (btnTrash) btnTrash.addEventListener('click', () => { currentView = 'trash'; loadTasks(); });
+
+
+document.getElementById('filter').addEventListener('change', loadTasks);
+if (tagFilterEl) tagFilterEl.addEventListener('change', loadTasks);
+if (sortEl) sortEl.addEventListener('change', loadTasks);
+const TAGS = ["feeding", "cleaning", "playing"];
+tagFilterEl.innerHTML = `<option value="">All types</option>` +
+  TAGS.map(t => `<option value="${t}">${t}</option>`).join('');
+
+
+loadTags();
+loadTasks();
+
+async function loadTags() {
+  if (!tagFilterEl) return;
+  try {
+    const res = await fetch(`${API_BASE}/tags`);
+    if (!res.ok) return;
+    const data = await res.json();
+    tagFilterEl.innerHTML = `<option value="">All types</option>`;
+    for (const name of data.items) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      tagFilterEl.appendChild(opt);
+    }
+  } catch (e) {
+    console.warn('load tags failed', e);
+  }
+}
+
+function toISO(dtLocal) {
+  if (!dtLocal) return null;
+  const d = new Date(dtLocal);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function parseTags(s) {
+  if (!s) return null;
+  return s.split(",").map(x => x.trim()).filter(Boolean);
+}
+
+
+async function loadTasks() {
+  const status = document.getElementById('filter').value;
+  const tag = tagFilterEl ? tagFilterEl.value : '';
+  const sort = sortEl ? sortEl.value : '';
+  const qs = new URLSearchParams();
+
+  if (status) qs.set('status', status);
+  if (tag) qs.set('tag', tag);
+  if (sort) qs.set('sort', sort);
+  if (currentView === 'trash') {
+    qs.set('only_deleted', '1');
+  } 
+
+  const url = `${API_BASE}/tasks${qs.toString() ? `?${qs}` : ''}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    alert('Load failed: ' + await res.text());
+    return;
+  }
+  const data = await res.json();
+
+  const tbody = document.querySelector('#tbl tbody');
+  tbody.innerHTML = '';
+  for (const t of data.items) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${t.id}</td>
+      <td>${t.title ?? ''}</td>
+      <td>${t.status}</td>
+      <td>${t.priority ?? ''}</td>
+      <td>${t.due_at ? new Date(t.due_at).toLocaleString() : ''}</td>
+      <td>${t.points ?? ''}</td>
+      <td>${Array.isArray(t.tags) && t.tags.length > 0 ? t.tags[0]: ""}</td>
+      <td>${t.deleted_at ? 'yes' : 'no'}</td>
+      <td class="row-btns">
+        ${t.deleted_at
+          ? `<button onclick="restoreTask(${t.id})">Restore</button>`
+          : `
+             <button onclick="updateTask(${t.id})">Update</button>
+             <button onclick="startTask(${t.id})" ${t.status !== 'todo' ? 'disabled' : ''}>Start</button>
+             <button onclick="completeTask(${t.id})" ${t.status !== 'in_progress' ? 'disabled' : ''}>Complete</button>
+             <button onclick="delTask(${t.id})">Delete</button>
+            `}
+      </td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+
+async function createTask(e) {
+  e.preventDefault();
+  const title = document.getElementById('title').value.trim();
+  const description = document.getElementById('desc').value.trim();
+  const due_at = toISO(document.getElementById('due').value);
+  const priority = document.getElementById('priority').value;
+  const pointsRaw = document.getElementById('points').value;
+  const tagVal = document.getElementById('tags').value;
+  const tags = tagVal ? [tagVal] : []; 
+
+
+  const body = { title, description: description || null, due_at, priority, tags, points: pointsRaw ? Number(pointsRaw) : null };
+
+  const res = await fetch(`${API_BASE}/tasks`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    alert('Create failed: ' + text);
+    return;
+  }
+  document.getElementById('createForm').reset();
+  document.getElementById('desc').value = '';
+  document.getElementById('tags').value = '';
+  loadTasks();
+}
+
+
+async function updateTask(id) {
+ 
+  const r0 = await fetch(`${API_BASE}/tasks/${id}`);
+  if (!r0.ok) return alert('Fetch task failed: ' + await r0.text());
+  const t = await r0.json();
+
+  const title = prompt("Title:", t.title ?? "");
+  if (title === null) return;
+
+  const description = prompt("Description:", t.description ?? "");
+  if (description === null) return;
+
+  const priority = prompt("Priority [low|normal|high]:", t.priority ?? "normal");
+  if (priority === null) return;
+
+  const dueIso = prompt("Due (ISO8601, e.g. 2025-12-31T23:59:00Z):", t.due_at ?? "");
+  if (dueIso === null) return;
+
+  const pointsStr = prompt("Points (optional integer):", t.points ?? "");
+  if (pointsStr === null) return;
+
+  const allowedTags = ["feeding", "cleaning", "playing"];
+
+  const currentTag = Array.isArray(t.tags) && t.tags.length > 0 ? t.tags[0] : "";
+  const newTag = prompt(
+    "Tag (feeding / cleaning / playing, leave empty for none):",
+    currentTag
+  );
+  if (newTag === null) return;
+
+  const body = {};
+  if (title.trim() !== "") body.title = title.trim();
+  if (description.trim() !== "") body.description = description.trim();
+  if (priority.trim() !== "") body.priority = priority.trim();
+
+  const dueTrim = dueIso.trim();
+  body.due_at = dueTrim ? dueTrim : null;
+
+  const ptrim = pointsStr.trim();
+  if (ptrim !== "") body.points = Number(ptrim);
+
+  const trimmedTag = newTag.trim();
+  if (trimmedTag) {
+    if (!allowedTags.includes(trimmedTag)) {
+      alert("Invalid tag. Allowed: feeding, cleaning, playing");
+      return;
+    }
+    body.tags = [trimmedTag];
+  } else {
+    body.tags = ["feeding"];  
+  }
+
+  const r = await fetch(`${API_BASE}/tasks/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!r.ok) {
+    const err = await r.text();
+    alert("Update failed: " + err);
+    return;
+  }
+
+  alert("Task updated successfully!");
+  loadTasks();
+}
+
+
+async function startTask(id) {
+  const r = await fetch(`${API_BASE}/tasks/${id}/start`, { method: 'POST' });
+  if (!r.ok) return alert('Start failed: ' + await r.text());
+  loadTasks();
+}
+
+async function completeTask(id) {
+  const r = await fetch(`${API_BASE}/tasks/${id}/complete`, { method: 'POST' });
+  if (!r.ok) return alert('Complete failed: ' + await r.text());
+  loadTasks();
+}
+
+async function delTask(id) {
+  if (!confirm('Soft delete task #' + id + '?')) return;
+  const r = await fetch(`${API_BASE}/tasks/${id}`, { method: 'DELETE' });
+  if (r.status !== 204) return alert('Delete failed: ' + await r.text());
+  loadTasks();
+}
+
+async function restoreTask(id) {
+  const r = await fetch(`${API_BASE}/tasks/${id}/restore`, { method: 'POST' });
+  if (!r.ok) return alert('Restore failed: ' + await r.text());
+ 
+  currentView = 'all';
+  loadTasks();
+}
+
+
+loadTasks();
+</script>
+
+</body>
+</html>

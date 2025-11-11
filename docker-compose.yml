@@ -1,0 +1,198 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/public:/app/public
+      - /app/node_modules
+    networks:
+      - microservices
+    restart: unless-stopped
+
+  api_gateway:
+    build:
+      context: ./backend/api_gateway
+      dockerfile: Dockerfile
+    container_name: api_gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - DEBUG=${DEBUG}
+      - USER_SERVICE_URL=${USER_SERVICE_URL}
+      - PET_SERVICE_URL=${PET_SERVICE_URL}
+      - PYTHONPATH=/app:/app/shared
+    volumes:
+      - ./backend/shared:/app/shared
+    depends_on:
+      - user_service
+      - pet_service
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/v1/api_health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  user_service:
+    build:
+      context: ./backend/user_service
+      dockerfile: Dockerfile
+    container_name: user_service
+    ports:
+      - "5001:5001"
+    environment:
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@user_db:5432/${USER_DB_NAME}
+      - FLASK_ENV=production
+      - USER_DATABASE_URL=postgresql://postgres:postgres@user_db:5432/user_service
+      - JWT_SECRET=pixelnova-secret-key
+      - JWT_ISS=pixelnova-user
+      - JWT_AUD=pixelnova-clients
+      - JWT_ACCESS_TTL_MIN=15
+      - PYTHONPATH=/app:/app/shared
+      - API_GATEWAY_HOST=api_gateway
+      - API_GATEWAY_PORT=5000
+    depends_on:
+      user_db:
+        condition: service_healthy
+    volumes:
+      - ./backend/shared:/app/shared
+      - /app/node_modules
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  user_db:
+    image: postgres:15-alpine
+    container_name: user_db
+    environment:
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pet_service:
+    build:
+      context: ./backend/pet_service
+      dockerfile: Dockerfile
+    container_name: pet_service
+    ports:
+      - "5002:5002"
+    environment:
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pet_db:5432/${PET_DB_NAME}
+      - PYTHONPATH=/app:/app/shared
+      - API_GATEWAY_HOST=api_gateway
+      - API_GATEWAY_PORT=5000
+    depends_on:
+      pet_db:
+        condition: service_healthy
+    volumes:
+      - ./backend/shared:/app/shared
+      - /app/node_modules
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  pet_db:
+    image: postgres:15-alpine
+    container_name: pet_db
+    environment:
+      - POSTGRES_DB=${PET_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pet_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  task_service:
+    build:
+      context: ./backend/task_service
+      dockerfile: Dockerfile
+    container_name: task_service
+    ports:
+      - "5003:5003"
+    environment:
+      - DEBUG=${DEBUG}
+      - TASK_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@task_db:5432/${TASK_DB_NAME}
+      - PYTHONPATH=/app:/app/shared
+      - API_GATEWAY_HOST=api_gateway
+      - API_GATEWAY_PORT=5000
+    depends_on:
+      task_db:
+        condition: service_healthy
+    volumes:
+      - ./backend/shared:/app/shared
+      - /app/node_modules
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  task_db:
+    image: postgres:15-alpine
+    container_name: task_db
+    environment:
+      - POSTGRES_DB=${TASK_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - task_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${TASK_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+volumes:
+  user_db_data:
+  pet_db_data:
+  task_db_data:
+
+networks:
+  microservices:
+    driver: bridge
