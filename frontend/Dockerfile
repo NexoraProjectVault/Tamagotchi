@@ -1,17 +1,20 @@
-# Currently using Node.js LTS version on Alpine Linux for a lightweight image - for development
-
+# Use lightweight Node.js image
 FROM node:20-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY frontend/package*.json ./
+# Copy only package files first (for caching)
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy frontend source code
+# Copy all source code
 COPY . .
 
-# Run development server with host set to allow external connections
-CMD ["npm", "run", "dev"]
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start the app (Render will run it as a web service)
+CMD ["npm", "run", "dev", "--", "--host"]
