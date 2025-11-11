@@ -113,7 +113,7 @@ function EventNotificationsContainer() {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/v1";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     
     const eventSource = new EventSource(`${backendUrl}/events`);
 

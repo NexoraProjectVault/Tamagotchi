@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./TaskForm.css";
 import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
-const API_BASE_URL = "http://localhost:5000/v1/task-service"; // API Gateway to task service
+const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/v1/task-service`; // API Gateway to task service
 
 export default function TaskForm() {
   const navigate = useNavigate();
