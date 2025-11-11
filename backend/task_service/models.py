@@ -42,7 +42,7 @@ class Task(db.Model):
         }
 
     def __repr__(self):
-        return f'<Test {self.name}>'
+        return f'<Test {self.title}>'
     
 
 class Tag(db.Model):
