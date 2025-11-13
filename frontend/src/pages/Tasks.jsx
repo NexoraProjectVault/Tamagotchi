@@ -294,7 +294,7 @@ export default function TasksPageUI() {
   };
 
   const tagConfig = {
-    feeding: { icon: "✅", label: "Feed" },
+    feeding: { icon: "🍎", label: "Feed" },
     cleaning: { icon: "🧹", label: "Clean" },
     playing: { icon: "🎮", label: "Play with" },
   };
