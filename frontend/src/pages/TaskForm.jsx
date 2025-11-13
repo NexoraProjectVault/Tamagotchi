@@ -6,6 +6,35 @@ import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
 const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/v1/task-service`; // API Gateway to task service
 
+export function getAuthHeaders() {
+  const token  = localStorage.getItem("access_token");
+  const userId = localStorage.getItem("user_id");
+  const h = { "Content-Type": "application/json" };
+  if (token)  h.Authorization = `Bearer ${token}`;
+  if (userId) h["X-User-Id"] = userId;
+  return h;
+}
+
+// Helper to format ISO date to datetime-local format
+const formatDatetimeLocal = (isoString) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Helper to convert datetime-local to ISO
+const datetimeLocalToISO = (datetimeLocal) => {
+  if (!datetimeLocal) return null;
+  const date = new Date(datetimeLocal);
+  return date.toISOString();
+};
+
+
 export default function TaskForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,32 +49,73 @@ export default function TaskForm() {
   const [status, setStatus] = useState("To Do");
   const [priority, setPriority] = useState("Low");
   const [points, setPoints] = useState("");
-  const [recurrence, setRecurrence] = useState("daily");
+  const [recurrence, setRecurrence] = useState("");
+  const [repeatEnd, setRepeatEnd] = useState("");
+  
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log("📝 TaskForm mounted, editingTask:", editingTask);
+    
     if (editingTask) {
-      console.log("Editing task:", editingTask);
+      console.log("✏️ Editing task:", editingTask);
 
-      setName(editingTask.title || editingTask.name);
-      setDesc(editingTask.description || editingTask.desc);
+      // Set all fields
+      setName(editingTask.title || "");
+      setDesc(editingTask.description || "");
       
-      // Convert tag from backend format to UI format
-      setStatus(toUIValue("status", editingTask.status));
-      setPriority(toUIValue("priority", editingTask.priority));
-      setType(toUIValue("tag", editingTask.tags?.[0]));
+      // Convert from backend format to UI format
+      setStatus(toUIValue("status", editingTask.status) || "To Do");
+      setPriority(toUIValue("priority", editingTask.priority) || "Low");
+      setType(toUIValue("tag", editingTask.tags?.[0]) || "Feeding");
       
       setPoints(editingTask.points || "");
-      setRecurrence(editingTask.recurrence || "daily");
+
+      setRecurrence(editingTask.repeat_every || "");
+
+      if (editingTask.repeat_until) {
+        const endDate = editingTask.repeat_until.split("T")[0];
+        setRepeatEnd(endDate);
+      } else {
+        setRepeatEnd("");
+      }
       
-      // Format due date
-      setDue(
-        editingTask.due_at
-          ? new Date(editingTask.due_at).toISOString().split("T")[0]
-          : editingTask.due || ""
-      );
+      // Format due datetime for datetime-local input
+      if (editingTask.due_at) {
+        const formattedDatetime = formatDatetimeLocal(editingTask.due_at);
+        setDue(formattedDatetime);
+        console.log("📅 Due datetime set to:", formattedDatetime);
+      } else {
+        // Default to tomorrow at 11:59 PM
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 59, 0, 0);
+        const formattedDatetime = formatDatetimeLocal(tomorrow.toISOString());
+        setDue(formattedDatetime);
+        console.log("📅 No due_at, setting default:", formattedDatetime);
+      }
+    } else {
+      console.log("➕ Creating new task, setting defaults");
+      
+      // For new tasks, set defaults
+      setName("");
+      setDesc("");
+      setStatus("To Do");
+      setPriority("Low");
+      setType("Feeding");
+      setPoints("");
+      setRecurrence("");
+      setRepeatEnd("");
+
+      // Default to tomorrow at 11:59 PM
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(23, 59, 0, 0);
+      const formattedDatetime = formatDatetimeLocal(tomorrow.toISOString());
+      setDue(formattedDatetime);
+      console.log("📅 New task default due date:", formattedDatetime);
     }
   }, [editingTask]);
 
@@ -55,15 +125,45 @@ export default function TaskForm() {
     setError(null);
 
     try {
+
+      // Convert datetime-local to ISO format
+      let dueDate = null;
+      if (due) {
+        dueDate = datetimeLocalToISO(due);
+        if (!dueDate) {
+          throw new Error("Invalid date format");
+        }
+      } else {
+        // Default to tomorrow at 11:59 PM
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 59, 0, 0);
+        dueDate = tomorrow.toISOString();
+      }
       const taskData = {
         title: name,
         description: desc,
         tags: [toBackendValue("tag", tag)],
-        due_at: due ? new Date(due).toISOString() : null,
+        due_at: dueDate,
         priority: toBackendValue("priority", priority),
         points: Number(points) || 0,
         status: toBackendValue("status", status),
       };
+
+      if (!isEdit) {
+        // Only allow setting recurring when creating new task
+        if (recurrence) {
+          taskData.repeat_every = recurrence;
+          if (repeatEnd) {
+            taskData.repeat_until = new Date(repeatEnd + "T23:59:59Z").toISOString();
+          }
+        } else {
+          taskData.repeat_every = null;
+          taskData.repeat_until = null;
+        }
+      }
+
+
 
       let response;
 
@@ -73,7 +173,7 @@ export default function TaskForm() {
         console.log("Payload:", taskData);
         response = await fetch(`${API_BASE_URL}/tasks/${editingTask.id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(taskData),
         });
       } else {
@@ -84,7 +184,7 @@ export default function TaskForm() {
 
         response = await fetch(postUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify(taskData),
         });
       }
@@ -187,7 +287,7 @@ export default function TaskForm() {
         <div className="tf-field">
           <span className="tf-label">Status</span>
           <div className="tf-chip-row">
-            {["To Do", "In Progress", "Completed"].map((s) => (
+            {["To Do", "In Progress"].map((s) => (
               <button
                 key={s}
                 type="button"
@@ -201,17 +301,73 @@ export default function TaskForm() {
           </div>
         </div>
 
-        {/* Due Date */}
+        {/* Due Date and Time */}
         <label className="tf-field">
-          <span className="tf-label">Due Date</span>
+          <span className="tf-label">Due Date & Time</span>
           <input
-            type="date"
+            type="datetime-local"
             className="tf-input"
             value={due}
             onChange={(e) => setDue(e.target.value)}
             disabled={loading}
           />
         </label>
+
+        {/* 🔁 Recurring (only when creating new task) */}
+        {!isEdit && (
+          <div className="tf-field">
+            <span className="tf-label">Repeat</span>
+            <div className="tf-chip-row">
+              <button
+                type="button"
+                className={`tf-chip ${recurrence === "" ? "active" : ""}`}
+                onClick={() => setRecurrence("")}
+                disabled={loading}
+              >
+                Does not repeat
+              </button>
+              <button
+                type="button"
+                className={`tf-chip ${recurrence === "daily" ? "active" : ""}`}
+                onClick={() => setRecurrence("daily")}
+                disabled={loading}
+              >
+                Daily
+              </button>
+              <button
+                type="button"
+                className={`tf-chip ${recurrence === "weekly" ? "active" : ""}`}
+                onClick={() => setRecurrence("weekly")}
+                disabled={loading}
+              >
+                Weekly
+              </button>
+              <button
+                type="button"
+                className={`tf-chip ${recurrence === "monthly" ? "active" : ""}`}
+                onClick={() => setRecurrence("monthly")}
+                disabled={loading}
+              >
+                Monthly
+              </button>
+            </div>
+
+            {recurrence && (
+              <label className="tf-subfield" style={{ marginTop: "0.75rem" }}>
+                <span className="tf-label">End date (optional)</span>
+                <input
+                  type="date"
+                  className="tf-input"
+                  value={repeatEnd}
+                  onChange={(e) => setRepeatEnd(e.target.value)}
+                  disabled={loading}
+                />
+              </label>
+            )}
+          </div>
+        )}
+
+
 
         {/* Points */}
         <label className="tf-field">

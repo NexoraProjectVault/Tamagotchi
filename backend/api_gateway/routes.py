@@ -168,7 +168,8 @@ def dashboard():
     services_status = {
         'user_service': check_service_health(Config.USER_SERVICE_URL),
         'pet_service': check_service_health(Config.PET_SERVICE_URL),
-        'task_service': check_service_health(Config.TASK_SERVICE_URL)
+        'task_service': check_service_health(Config.TASK_SERVICE_URL),
+        'data_tracking_service': check_service_health(Config.DATA_TRACKING_SERVICE_URL)
     }
     
     return render_dashboard(services_status), 200
@@ -199,9 +200,10 @@ def proxy_tasks(endpoint):
     """Forward task service requests"""
     return proxy_request(Config.TASK_SERVICE_URL, endpoint, service_type='task')
 
-@api_gateway.route("/")
-def home():
-    return "API-GATEWAY"
+@api_gateway.route('/data-tracking-service/<path:endpoint>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
+def proxy_data_tracking(endpoint):
+    """Forward data-tracking service requests"""
+    return proxy_request(Config.DATA_TRACKING_SERVICE_URL, endpoint, service_type='data-tracking')
 
 def proxy_request(service_url, endpoint, service_type='default'):
     """

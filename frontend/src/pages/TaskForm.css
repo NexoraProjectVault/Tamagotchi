@@ -2,11 +2,25 @@
 
 .tf-page {
   min-height: 100vh;
-  background: #fff;
   padding: 48px 72px 80px;
   max-width: 1200px;
   margin: 0 auto;
+
+  background:
+    radial-gradient(circle at 5% 10%, rgba(255, 255, 255, 0.45), transparent 60%),
+    radial-gradient(circle at 90% 0%, rgba(209, 255, 241, 0.35), transparent 70%),
+    linear-gradient(
+      180deg,
+      #f6fff8 0%,     
+      #e4fff9 30%,    
+      #dcf3ff 70%,    
+      #f8fff0 100%    
+    );
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
+
 
 .tf-header {
   margin-bottom: 40px;
@@ -43,11 +57,27 @@
   border-radius: 6px;
   padding: 10px 14px;
   font-size: 16px;
+  color: #111827;
+  background-color: #fff;
 }
 
 .tf-input:focus {
   outline: none;
   border-color: #111;
+}
+
+input[type="datetime-local"].tf-input {
+  padding-right: 25px;
+}
+
+input[type="datetime-local"].tf-input::-webkit-calendar-picker-indicator {
+  cursor: pointer !important;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  opacity: 1 !important;
+  background-color: #000000;
 }
 
 .tf-hint {
@@ -70,6 +100,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: 0.15s;
+  color: #111827;
 }
 
 .tf-chip.active {

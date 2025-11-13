@@ -34,6 +34,7 @@ services:
     depends_on:
       - user_service
       - pet_service
+      - data_tracking_service
     networks:
       - microservices
     restart: unless-stopped
@@ -90,7 +91,7 @@ services:
       - microservices
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${USER_DB_NAME} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -136,11 +137,57 @@ services:
       - microservices
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${PET_DB_NAME} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  data_tracking_service:
+    build:
+      context: ./backend/data_tracking_service
+      dockerfile: Dockerfile
+    container_name: data_tracking_service
+    ports:
+      - "5004:5004"
+    environment:
+      - DEBUG=${DEBUG}
+      - DATA_TRACKING_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@data_tracking_db:5432/${DATA_TRACKING_DB_NAME}
+      - PYTHONPATH=/app:/app/shared
+      - API_GATEWAY_HOST=api_gateway
+      - API_GATEWAY_PORT=5000
+    depends_on:
+      data_tracking_db:
+        condition: service_healthy
+    volumes:
+      - ./backend/shared:/app/shared
+      - /app/node_modules
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  data_tracking_db:
+    image: postgres:15-alpine
+    container_name: data_tracking_db
+    environment:
+      - POSTGRES_DB=${DATA_TRACKING_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - data_tracking_db_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
   task_service:
     build:
       context: ./backend/task_service
@@ -182,7 +229,7 @@ services:
       - microservices
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${TASK_DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${TASK_DB_NAME} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -192,7 +239,7 @@ volumes:
   user_db_data:
   pet_db_data:
   task_db_data:
-
+  data_tracking_db_data:
 networks:
   microservices:
     driver: bridge

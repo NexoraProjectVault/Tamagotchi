@@ -1,0 +1,51 @@
+
+.fm-wrapper {
+  position: fixed;
+  right: 32px;
+  bottom: 120px; 
+  z-index: 250;  
+}
+
+.fm-fab {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 26px;
+  color: #111827;
+
+  background: radial-gradient(circle at 30% 30%, #ffffff, #ffd6f2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out,
+    background 0.2s ease-out;
+}
+
+.fm-fab:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+}
+
+.fm-fab:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.fm-fab.is-playing {
+  background: radial-gradient(circle at 30% 30%, #ffffff, #c1ffe2);
+}
+
+.fm-icon {
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .fq-fab {
+    right: 14px !important;
+    bottom: 14px !important;
+  }
+}

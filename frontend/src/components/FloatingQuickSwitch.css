@@ -1,72 +1,114 @@
 /* Floating button */
 .fq-fab {
-  position: fixed;
-  right: 26px;
-  bottom: 26px;
-  width: 58px;
-  height: 58px;
+  position: fixed !important;
+  right: 26px !important;
+  bottom: 26px !important;
+
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.75); 
-  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+
+  background: radial-gradient(circle at 30% 0%, #ffffff, #ffe6f7 40%, #ffc6f0 75%);
+  color: #111827;
   font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+
   display: grid;
   place-items: center;
   cursor: pointer;
-  z-index: 1200; 
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease, background 0.2s ease;
-  backdrop-filter: blur(3px);
+  z-index: 4000;
+
+  box-shadow:
+    0 10px 26px rgba(15, 23, 42, 0.22),
+    0 0 6px rgba(255, 255, 255, 0.9) inset;
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.25s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .fq-fab:hover {
-  background: rgba(15, 23, 42, 0.9);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.26),
+    0 0 8px rgba(255, 255, 255, 1) inset;
+  background: radial-gradient(circle at 25% 0%, #ffffff, #ffdff5 40%, #ffb8eb 80%);
+}
+
+.fq-fab:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
 }
 
 .fq-fab.is-open {
-  background: rgba(15, 23, 42, 0.95);
+  background: radial-gradient(circle at 30% 0%, #ffffff, #ffd0f0 35%, #f9a8d4 80%);
+  color: #111827;
+  border-color: rgba(255, 255, 255, 1);
 }
 
 .fq-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 15, 15, 0.25);
-  backdrop-filter: blur(6px);   
-  z-index: 1190;
+  background: rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 3990;
 }
 
 .fq-panel {
   position: fixed;
   right: 26px;
-  bottom: 96px; 
+  bottom: 96px;
   width: 240px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 18px;
-  padding: 16px 16px 12px;
-  z-index: 1201;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15);
+
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border-radius: 20px;
+  padding: 14px 14px 10px;
+  z-index: 4001;
+
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+}
+
+.fq-panel::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  right: 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fec6ff, #c7d2fe, #bbf7d0);
+  opacity: 0.9;
 }
 
 .fq-title {
-  margin: 0;
-  font-size: 15px;
+  margin: 10px 0 0;
+  font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: #111827;
 }
 
 .fq-sub {
-  margin: 3px 0 10px;
-  font-size: 12px;
+  margin: 2px 0 8px;
+  font-size: 11px;
   color: #6b7280;
 }
 
 .fq-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .fq-item {
@@ -74,26 +116,33 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  padding: 7px 10px;
   border: 0;
-  background: rgba(255, 255, 255, 0.35);
   border-radius: 12px;
-  padding: 8px 12px 7px;
-  font-size: 14px;
+
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  color: #111827;
   cursor: pointer;
-  transition: background 0.15s ease;
+
+  transition: background 0.18s ease, transform 0.16s ease, box-shadow 0.18s ease;
 }
 
 .fq-item:hover {
-  background: rgba(15, 23, 42, 0.06);
+  background: linear-gradient(90deg, #fff7ff, #e0f2ff);
+  box-shadow: 0 4px 10px rgba(148, 163, 253, 0.25);
+  transform: translateY(-1px);
 }
 
 .fq-item.active {
-  background: rgba(15, 23, 42, 0.12);
+  background: linear-gradient(90deg, #fee2ff, #dbeafe);
   font-weight: 600;
+  box-shadow: 0 4px 10px rgba(148, 163, 253, 0.3);
 }
 
 .fq-item-arrow {
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.7;
 }
 
@@ -104,7 +153,7 @@
     width: 210px;
   }
   .fq-fab {
-    right: 14px;
-    bottom: 14px;
+    right: 14px !important;
+    bottom: 14px !important;
   }
 }

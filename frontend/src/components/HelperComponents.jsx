@@ -40,3 +40,23 @@ export const toBackendValue = (type, value) => {
 const reverseMap = (map) => {
   return Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]));
 };
+
+export function listenToEvents(onEvent) {
+  const eventSource = new EventSource(`${import.meta.env.VITE_BACKEND_URL}/v1/events`);
+
+  eventSource.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      onEvent(data);
+    } catch (err) {
+      console.error("Error parsing SSE event:", err);
+    }
+  };
+
+  eventSource.onerror = (err) => {
+    console.error("SSE connection error:", err);
+    eventSource.close();
+  };
+
+  return eventSource;
+}

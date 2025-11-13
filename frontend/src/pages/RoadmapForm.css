@@ -1,0 +1,187 @@
+/* src/pages/RoadmapForm.css */
+
+.tf-page {
+  min-height: 100vh;
+  padding: 56px 56px 80px;
+  max-width: 1100px;
+  margin: 40px auto;
+
+  border-radius: 32px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(250, 244, 232, 0.96),
+    rgba(244, 234, 255, 0.96)
+  );
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.28),
+    inset 0 0 14px rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(18px);
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+.tf-header {
+  margin-bottom: 40px;
+}
+
+.tf-title {
+  font-size: 46px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  text-align: left;
+}
+
+.tf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.tf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tf-label {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #1f2937;
+}
+
+.tf-input {
+  height: 50px;
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-size: 16px;
+
+  border: 1px solid rgba(209, 213, 219, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(148, 163, 184, 0.25);
+}
+
+.tf-input:focus {
+  outline: none;
+  border-color: #f4b86b; 
+  box-shadow:
+    0 0 0 2px rgba(244, 184, 107, 0.35),
+    0 10px 24px rgba(148, 163, 184, 0.35);
+}
+
+
+input[type="date"].tf-input {
+  padding-right: 25px;
+}
+
+input[type="date"].tf-input::-webkit-calendar-picker-indicator {
+  cursor: pointer !important;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  opacity: 1 !important;
+  background-color: #000000;
+}
+
+.tf-input:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.tf-hint {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.tf-chip-row {
+  display: flex;
+  gap: 12px;
+}
+
+.tf-chip {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(209, 213, 219, 0.9);
+  min-width: 96px;
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.15s ease;
+  box-shadow: 0 6px 16px rgba(148, 163, 184, 0.3);
+}
+
+.tf-chip:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(148, 163, 184, 0.4);
+}
+
+.tf-chip.active {
+  background: #111827;
+  color: #f9fafb;
+  border-color: #020617;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.7);
+}
+
+.tf-actions {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.tf-btn {
+  height: 52px;
+  padding: 0 42px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.tf-btn.outline {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(17, 24, 39, 0.9);
+  color: #111827;
+  box-shadow: 0 10px 24px rgba(148, 163, 184, 0.35);
+}
+
+.tf-btn.outline:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(148, 163, 184, 0.45);
+}
+
+.tf-btn.solid {
+  background: #111827;
+  border: 1.5px solid #020617;
+  color: #f9fafb;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.7);
+}
+
+.tf-btn.solid:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+}
+
+@media (max-width: 768px) {
+  .tf-page {
+    padding: 32px 18px 64px;
+  }
+  .tf-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tf-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.tf-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

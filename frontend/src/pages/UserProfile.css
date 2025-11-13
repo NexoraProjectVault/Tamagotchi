@@ -1,8 +1,16 @@
 
 .profile-page {
-  background: linear-gradient(to bottom, #bde3ff 0%, #e8faff 100%); ;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.4), transparent 60%),
+    radial-gradient(circle at 85% 0%, rgba(243, 255, 207, 0.35), transparent 70%),
+    linear-gradient(180deg,
+      #fafff2 0%,
+      #e7f7ff 50%,
+      #fffbe6 100%
+    );
   color: #111;
 }
+
 
 .profile-hero {
   display: grid;
@@ -12,7 +20,21 @@
   padding: 28px 40px;
 }
 .hero-left { display: flex; gap: 20px; align-items: center; }
-.avatar-xl { width: 96px; height: 96px; border-radius: 50%; background: #e8e8e8; }
+
+.avatar-xl {
+  width: 120px;              
+  height: 120px;
+  border-radius: 50%;
+
+  background-image: url("../assets/profile.png");
+  background-size: cover;      
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
 .hero-texts { display: grid; gap: 8px; }
 .hero-title { font-size: 32px; font-weight: 800; margin: 0; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -30,11 +52,41 @@
 .section-divider { border: 0; border-top: 1px solid #ededed; }
 
 .profile-section {
-  display: grid;
-  grid-template-columns: minmax(160px, 28%) 1fr;
-  gap: 24px;
-  padding: 40px 40px 12px;
+  background: rgba(255, 255, 255, 0.45);      
+  backdrop-filter: blur(14px) saturate(130%); 
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border-radius: 28px;                        
+  box-shadow: 0 10px 30px rgba(120, 174, 212, 0.15); 
+  padding: 36px 42px 40px;
+  margin: 40px auto;
+  max-width: 1100px;
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
 }
+
+.profile-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(120, 174, 212, 0.22);
+}
+
+.profile-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 20% 15%,
+    rgba(225, 255, 245, 0.4),
+    transparent 60%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+.profile-section > * {
+  position: relative; 
+  z-index: 1;
+}
+
 .section-left { padding-top: 10px; }
 .section-title { font-size: 40px; font-weight: 800; margin: 0; }
 .section-right { background: transparent; }
@@ -86,3 +138,90 @@ html, body, #root { width: 100%; height: 100%; }
   padding-left: 24px;   
   padding-right: 24px;
 }
+
+/* optional */
+.input { padding: 10px 12px; border: 1px solid #d6d6d6; border-radius: 10px; font-size: 16px; width: min(560px, 80vw); }
+.btn-ghost { background: transparent; border: 1px solid #999; padding: 10px 16px; border-radius: 10px; margin-left: 8px; cursor: pointer; }
+.inline-note { margin-top: 8px; color: #065f46; font-weight: 600; }
+.edit-actions { display: flex; gap: 8px; }
+
+/* --- Add or modify near your existing optional styles --- */
+
+/* 1. Cancel button text dark */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #999;
+  padding: 10px 16px;
+  border-radius: 10px;
+  margin-left: 8px;
+  cursor: pointer;
+  color: #111;              /* <- dark text color */
+  font-weight: 600;
+}
+
+/* 2. Input box half-width */
+.input {
+  padding: 10px 12px;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  font-size: 16px;
+  width: 50%;               /* <- half of container width */
+  min-width: 280px;         /* optional minimum so it doesn’t shrink too much */
+  max-width: 560px;         /* keep a sensible upper bound */
+  background: #333;         /* keep your current dark background if desired */
+  color: #fff;
+}
+
+/* Modal styling */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  width: min(420px, 90%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* General input styling */
+.input,
+.input.full {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #000;
+  border-radius: 10px;
+  font-size: 16px;
+  background: #000;     /* 🔥 Black input background */
+  color: #fff;          /* White text */
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input::placeholder,
+.input.full::placeholder {
+  color: #aaa;          /* Light grey placeholder text */
+}
+
+/* Focus effect */
+.input:focus,
+.input.full:focus {
+  border-color: #444;
+  background: #111;     /* Slightly lighter on focus for contrast */
+}
+
+.modal h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #111;
+}
+

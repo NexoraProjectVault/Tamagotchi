@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from models import db
-from routes import pets_bp
+from routes import pets_bp, root_bp
 
 def create_app():
     app = Flask(__name__)
@@ -15,6 +15,7 @@ def create_app():
         db.create_all()
     
     app.register_blueprint(pets_bp)
+    app.register_blueprint(root_bp)
     
     return app
 
