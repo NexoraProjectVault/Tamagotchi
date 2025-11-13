@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     middlewareMode: false,
     allowedHosts: [
-      tamagotchi-n0y6.onrender.com,
+      'tamagotchi-n0y6.onrender.com',
       process.env.USER_SERVICE_URL,
       process.env.PET_SERVICE_URL,
       process.env.API_GATEWAY_URL,
