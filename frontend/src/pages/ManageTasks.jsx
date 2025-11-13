@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./ManageTasks.css";
 import "./manage-theme.css";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const TASKS_URL = `${BASE_URL}/v1/task-service/tasks`;
+const baseUrl = import.meta.env.API_GATEWAY_URL;
+const taskUrl = `${baseUrl}/v1/task-service/tasks`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
@@ -60,7 +60,7 @@ export default function ManageTasks() {
           }
         }
 
-        const url = `${TASKS_URL}${qs.toString() ? `?${qs.toString()}` : ""}`;
+        const url = `${taskUrl}${qs.toString() ? `?${qs.toString()}` : ""}`;
         console.log("[ManageTasks] GET:", url);
 
 
@@ -94,7 +94,7 @@ export default function ManageTasks() {
     }
     try{
       // delete the task given the id
-      const response = await fetch(`${TASKS_URL}/${taskId}`, {
+      const response = await fetch(`${taskUrl}/${taskId}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
@@ -112,7 +112,7 @@ export default function ManageTasks() {
 
   const restoreTask = async (taskId) => {
     try {
-      const response = await fetch(`${TASKS_URL}/${taskId}/restore`, {
+      const response = await fetch(`${taskUrl}/${taskId}/restore`, {
         method: "POST",
         headers: getAuthHeaders(),
       });
@@ -132,7 +132,7 @@ export default function ManageTasks() {
 
   const startTask = async (taskId) => {
     try {
-      const response = await fetch(`${TASKS_URL}/${taskId}/start`, {
+      const response = await fetch(`${taskUrl}/${taskId}/start`, {
         method: "POST",
         headers: getAuthHeaders(),
       });
@@ -157,7 +157,7 @@ export default function ManageTasks() {
 
   const completeTask = async (taskId) => {
     try{
-      const response = await fetch(`${TASKS_URL}/${taskId}/complete`, {
+      const response = await fetch(`${taskUrl}/${taskId}/complete`, {
         method: "POST",
         headers: getAuthHeaders(), 
         body: JSON.stringify({

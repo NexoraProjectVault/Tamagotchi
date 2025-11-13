@@ -55,6 +55,7 @@ const getAuthHeaders = () => {
   }
   return headers;
 };
+
 /* ===== Navigator===== */
 const NAV_ITEMS = [
   { icon: "🏠", label: "Home",    key: "home", active: true },
@@ -77,64 +78,6 @@ const getIconForTag = (tag) => {
   };
   return icons[tag?.toLowerCase()] || "📝";
 };
-
-/* ===== Event Notification Popup ===== */
-function EventNotification({ event, onClose }) {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    // Auto-dismiss after 5 seconds
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      setTimeout(onClose, 300); // Allow fade-out animation
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  // Map event types to readable names and icons
-  const eventConfig = {
-    user_created: { icon: "👤", label: "User Created", color: "#3b82f6" },
-    user_updated: { icon: "👤", label: "User Updated", color: "#8b5cf6" },
-    task_created: { icon: "✏️", label: "Task Created", color: "#10b981" },
-    task_pending: { icon: "⏳", label: "Task Started", color: "#f59e0b" },
-    task_completed: { icon: "✅", label: "Task Completed", color: "#06b6d4" },
-    pet_created: { icon: "🐾", label: "Pet Created", color: "#ec4899" },
-    pet_updated: { icon: "🐾", label: "Pet Updated", color: "#f43f5e" },
-  };
-
-  const config = eventConfig[event.type] || {
-    icon: "📢",
-    label: "Event",
-    color: "#6b7280",
-  };
-
-  return (
-    <div
-      className={`event-notification ${isVisible ? "show" : "hide"}`}
-      style={{ "--notification-color": config.color }}
-    >
-      <div className="notification-icon">{config.icon}</div>
-      <div className="notification-content">
-        <div className="notification-title">{config.label}</div>
-        <div className="notification-message">
-          {event.data.title || event.data.name || `ID: ${event.data.id || event.data.task_id}`}
-        </div>
-        <div className="notification-time">
-          {new Date(event.timestamp).toLocaleTimeString()}
-        </div>
-      </div>
-      <button
-        className="notification-close"
-        onClick={() => {
-          setIsVisible(false);
-          setTimeout(onClose, 300);
-        }}
-      >
-        ✕
-      </button>
-    </div>
-  );
-}
 
 /* ===== Side bar: click will scroll to each section ===== */
 function Sidebar() {
@@ -202,7 +145,6 @@ function Sidebar() {
   );
 }
 
-
 /* ===== Task priority and badge ===== */
 function PriorityBadge({ level }) {
   const cls =
@@ -247,9 +189,9 @@ function UserSection() {
 
     // 2) Always fetch current user to override any stale cache
     const token = localStorage.getItem("access_token");
-    const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+    const baseUrl = import.meta.env.API_GATEWAY_URL;
     if (token) {
-      fetch(`${API_BASE}/v1/user-service/users/me`, {
+      fetch(`${baseUrl}/v1/user-service/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((r) => (r.ok ? r.json() : null))
@@ -290,9 +232,6 @@ function UserSection() {
     </section>
   );
 }
-
-
-
 
 /* ===== Pet Snapshot (the card) ===== */
 function PetSnapshotCard() {
@@ -403,8 +342,7 @@ function HomePage() {
   const fetchAndProcessTasks = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.VITE_BACKEND_URL;
-      
+      const baseUrl = import.meta.env.API_GATEWAY_URL;
       const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
         method: "GET",
         headers: getAuthHeaders(),
@@ -506,21 +444,6 @@ function PetDetailPage() {
       <main className="pet-detail-main">
         <h1 className="hero">Pixel</h1>
         <p className="muted">This is a placeholder for the Pet detail page. You can build it later.</p>
-        <Link to="/" className="back-link">← Back to Home</Link>
-      </main>
-    </div>
-  );
-}
-
-
-/* ===== /tasks page (empty occuppier) ===== */
-function TasksPlaceholderPage() {
-  return (
-    <div className="app">
-      <Sidebar />
-      <main className="pet-detail-main">
-        <h1 className="hero">Tasks</h1>
-        <p className="muted">This is a placeholder for the Tasks page. You can build it later.</p>
         <Link to="/" className="back-link">← Back to Home</Link>
       </main>
     </div>
@@ -638,18 +561,15 @@ function NeglectedSection() {
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
     const userId = localStorage.getItem("user_id");
-
     const headers = {
       "Content-Type": "application/json",
     };
-
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
     if (userId) {
       headers["X-User-Id"] = userId;
     }
-
     return headers;
   };
 
@@ -660,8 +580,7 @@ function NeglectedSection() {
   const fetchNeglectedTasks = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.VITE_BACKEND_URL;
-
+      const baseUrl = import.meta.env.API_GATEWAY_URL;
       const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
         method: "GET",
         headers: getAuthHeaders(),
@@ -872,17 +791,15 @@ export default function App() {
   const navigate = useNavigate();
 
   // treat these as auth pages
-
-
    useEffect(() => {
      const token = localStorage.getItem("access_token");
      if (!token) return; 
 
-     const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+     const baseUrl = import.meta.env.API_GATEWAY_URL;
 
      (async () => {
        try {
-         const res = await fetch(`${API_BASE}/v1/user-service/users/me`, {
+         const res = await fetch(`${baseUrl}/v1/user-service/users/me`, {
            headers: {
              Authorization: `Bearer ${token}`,
            },
@@ -960,7 +877,7 @@ export default function App() {
           </div>
           <button
             className="footer-health-btn"
-            onClick={() => window.location.href = `${import.meta.env.VITE_BACKEND_URL}/v1/health`}
+            onClick={() => window.location.href = `${import.meta.env.API_GATEWAY_URL}/v1/health`}
           >
             Health Check
           </button>

@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, request, jsonify, Response
 import requests
 from config import Config
@@ -259,6 +260,8 @@ def proxy_request(service_url, endpoint, service_type='default'):
 
 
 def render_dashboard(services_status):
+    api_url = os.getenv('FRONTEND_URL')
+
     cards_html = generate_service_cards(services_status)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -463,7 +466,7 @@ def render_dashboard(services_status):
             
             <div class="api-info">
                 <h2>📚 API Documentation</h2>
-                <a class="api-link" href="http://localhost:5173" target="_blank">Frontend</a>
+                <a class="api-link" href="{api_url}" target="_blank">Frontend</a>
             </div>
             
             <div class="footer">

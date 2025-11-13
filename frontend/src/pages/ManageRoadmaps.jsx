@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./ManageRoadmaps.css";
 import "./manage-theme.css";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const ROADMAPS_URL = `${BASE_URL}/v1/data-tracking-service/roadmaps`;
+const baseUrl = import.meta.env.API_GATEWAY_URL;
+const roadmapsUrl = `${baseUrl}/v1/data-tracking-service/roadmaps`;
 
 // Time conversion to UTC date string
 const formatUTCDate = (iso) => {
@@ -48,7 +48,7 @@ export default function ManageRoadmaps() {
       try {
         setLoading(true);
         
-        const response = await fetch(ROADMAPS_URL, {
+        const response = await fetch(roadmapsUrl, {
           method: "GET",
           headers: getAuthHeaders(),
         });
@@ -77,7 +77,7 @@ export default function ManageRoadmaps() {
         if (allTaskIds.size > 0) {
           const taskPromises = Array.from(allTaskIds).map(async (taskId) => {
             try {
-              const taskResponse = await fetch(`${BASE_URL}/v1/task-service/tasks/${taskId}`, {
+              const taskResponse = await fetch(`${baseUrl}/v1/task-service/tasks/${taskId}`, {
                 method: "GET",
                 headers: getAuthHeaders(),
               });
@@ -119,7 +119,7 @@ export default function ManageRoadmaps() {
     }
     try{
       // delete the roadmaps given the id
-      const response = await fetch(`${ROADMAPS_URL}/${roadmapId}`, {
+      const response = await fetch(`${roadmapsUrl}/${roadmapId}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });

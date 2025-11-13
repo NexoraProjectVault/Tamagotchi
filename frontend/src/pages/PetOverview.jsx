@@ -9,13 +9,12 @@
 //
 // Notes
 // -----
-// • All network endpoints are read from VITE_BACKEND_URL (fallback: http://localhost:5000).
+// • All network endpoints are read from API_GATEWAY_URL.
 // • Keep POINT_COST_PER_ACTION in sync with the backend cost to avoid UX mismatch.
 // -----------------------------------------------------------------------------
 
 // --- shared fetch helpers for other components (e.g., PetSnapshotCard) ---
-export const PET_API_BASE =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+export const baseUrl = import.meta.env.API_GATEWAY_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
@@ -35,7 +34,7 @@ const getAuthHeaders = () => {
 };
 
 export async function fetchPetMe() {
-  const res = await fetch(`${PET_API_BASE}/v1/pet-service/pets/me`, {
+  const res = await fetch(`${baseUrl}/v1/pet-service/pets/me`, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to load pet: ${res.statusText}`);
@@ -43,7 +42,7 @@ export async function fetchPetMe() {
 }
 
 export async function fetchPetStatus() {
-  const res = await fetch(`${PET_API_BASE}/v1/pet-service/pets/me/status`, {
+  const res = await fetch(`${baseUrl}/v1/pet-service/pets/me/status`, {
     headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error(`Failed to load status: ${res.statusText}`);
@@ -66,8 +65,6 @@ const POINT_COST_PER_ACTION = 1; // keep in sync with backend
 
 export default function PetOverview() {
   const navigate = useNavigate();
-  // API base URL; uses env var if present, otherwise dev default.
-  const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   // Minimal pet shape so the UI has safe defaults before the first fetch.
   const [pet, setPet] = useState({
@@ -467,7 +464,7 @@ export default function PetOverview() {
                 className="po-action-btn"
                 onClick={() => doAction("clean")}
               >
-                Clean (−{POINT_COST_PER_ACTION})
+                Clean (-{POINT_COST_PER_ACTION})
               </button>
             </div>
           </div>

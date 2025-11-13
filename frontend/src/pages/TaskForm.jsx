@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./TaskForm.css";
 import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
-const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/v1/task-service`; // API Gateway to task service
+const taskServiceUrl = `${import.meta.env.API_GATEWAY_URL}/v1/task-service`; // API Gateway to task service
 
 export function getAuthHeaders() {
   const token  = localStorage.getItem("access_token");
@@ -171,14 +171,14 @@ export default function TaskForm() {
         // Update existing task via PATCH
         console.log("Updating task:", editingTask.id);
         console.log("Payload:", taskData);
-        response = await fetch(`${API_BASE_URL}/tasks/${editingTask.id}`, {
+        response = await fetch(`${taskServiceUrl}/tasks/${editingTask.id}`, {
           method: "PATCH",
           headers: getAuthHeaders(),
           body: JSON.stringify(taskData),
         });
       } else {
         // Create new task via POST
-        const postUrl = `${API_BASE_URL}/tasks`;
+        const postUrl = `${taskServiceUrl}/tasks`;
         console.log("POST URL:", postUrl);
         console.log("Payload:", taskData);
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SelectPet.css";
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const baseUrl = import.meta.env.API_GATEWAY_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
@@ -43,7 +43,7 @@ export default function SelectPet() {
 
       try {
         const res = await fetch(
-          `${API_BASE}/v1/pet-service/pets/me`,
+          `${baseUrl}/v1/pet-service/pets/me`,
           { headers: getAuthHeaders() }
         );
 
@@ -81,7 +81,7 @@ export default function SelectPet() {
       return;
     }
 
-    const res = await fetch(`${API_BASE}/v1/pet-service/pets`, {
+    const res = await fetch(`${baseUrl}/v1/pet-service/pets`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({

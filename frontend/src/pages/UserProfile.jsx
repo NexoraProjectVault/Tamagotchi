@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserProfile.css";
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"; // API Gateway to user service
+const baseUrl = import.meta.env.API_GATEWAY_URL; // API Gateway to user service
 // ^ keep your latest setup :contentReference[oaicite:4]{index=4}
 
 export default function UserProfile() {
@@ -45,7 +45,7 @@ export default function UserProfile() {
     setPwdMsg("");
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_BASE}/v1/user-service/users/me/password`, {
+      const res = await fetch(`${baseUrl}/v1/user-service/users/me/password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default function UserProfile() {
 
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/v1/user-service/users/me`, {
+        const res = await fetch(`${baseUrl}/v1/user-service/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -160,7 +160,7 @@ export default function UserProfile() {
     setNote("");
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_BASE}/v1/user-service/users/me`, {
+      const res = await fetch(`${baseUrl}/v1/user-service/users/me`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

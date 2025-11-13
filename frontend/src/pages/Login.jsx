@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const baseUrl = import.meta.env.API_GATEWAY_URL;
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ export default function Login() {
     setErr("");
     setLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/v1/user-service/auth/login`, {
+      const r = await fetch(`${baseUrl}/v1/user-service/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: pwd }),

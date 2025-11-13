@@ -4,8 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RoadmapForm.css";
 import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const API_BASE_URL = `${BASE_URL}/v1/data-tracking-service`; // API Gateway to data tracking service
+const baseUrl = import.meta.env.API_GATEWAY_URL;
+const dataTrackingUrl = `${baseUrl}/v1/data-tracking-service`; // API Gateway to data tracking service
 
 export function getAuthHeaders() {
   const token  = localStorage.getItem("access_token");
@@ -41,7 +41,7 @@ export default function RoadmapForm() {
     if (!isEdit) {
       const checkRoadmapCount = async () => {
         try {
-          const response = await fetch(`${API_BASE_URL}/roadmaps`, {
+          const response = await fetch(`${dataTrackingUrl}/roadmaps`, {
             method: "GET",
             headers: getAuthHeaders(),
           });
@@ -64,7 +64,7 @@ export default function RoadmapForm() {
     if (isEdit && roadmapId) {
       const fetchRoadmap = async () => {
         try {
-          const response = await fetch(`${API_BASE_URL}/roadmaps/${roadmapId}`, {
+          const response = await fetch(`${dataTrackingUrl}/roadmaps/${roadmapId}`, {
             method: "GET",
             headers: getAuthHeaders(),
           });
@@ -90,7 +90,7 @@ export default function RoadmapForm() {
       try {
         setTasksLoading(true);
 
-        const response = await fetch(`${BASE_URL}/v1/task-service/tasks`, {
+        const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
           method: "GET",
           headers: getAuthHeaders(),
         });
@@ -114,7 +114,7 @@ export default function RoadmapForm() {
             const fetchedTasks = await Promise.all(
               missingTaskIds.map(async (taskId) => {
                 try {
-                  const res = await fetch(`${BASE_URL}/v1/task-service/tasks/${taskId}`, {
+                  const res = await fetch(`${baseUrl}/v1/task-service/tasks/${taskId}`, {
                     method: "GET",
                     headers: getAuthHeaders(),
                   });
@@ -224,14 +224,14 @@ export default function RoadmapForm() {
         const idToUpdate = roadmapId || editingRoadmap?.id;
         console.log("Updating roadmap:", idToUpdate);
         console.log("Payload:", submitData);
-        response = await fetch(`${API_BASE_URL}/roadmaps/${idToUpdate}`, {
+        response = await fetch(`${dataTrackingUrl}/roadmaps/${idToUpdate}`, {
           method: "PATCH",
           headers: getAuthHeaders(),
           body: JSON.stringify(submitData),
         });
       } else {
         // Create new roadmap via POST
-        const postUrl = `${API_BASE_URL}/roadmaps`;
+        const postUrl = `${dataTrackingUrl}/roadmaps`;
         console.log("POST URL:", postUrl);
         console.log("Payload:", submitData);
 
