@@ -11,7 +11,8 @@ COPY frontend/package*.json ./
 RUN npm install
 
 # Copy frontend source code
-COPY frontend/ .
+# COPY frontend/ .
+COPY . .
 
 # Expose Vite dev server port
 EXPOSE 5173
