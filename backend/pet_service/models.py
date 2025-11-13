@@ -134,8 +134,8 @@ class Pet(db.Model):
 
         Reads STAT_MIN/STAT_MAX from Flask config; falls back to 0/100.
         """
-        mn = current_app.config.get('STAT_MIN', 0)
-        mx = current_app.config.get('STAT_MAX', 100)
+        mn = current_app.config.get('STAT_MIN')
+        mx = current_app.config.get('STAT_MAX')
         return max(mn, min(mx, int(value)))
 
     def tick(self, now: datetime | None = None) -> bool:
@@ -168,9 +168,9 @@ class Pet(db.Model):
         elapsed = (now - self.last_tick_at).total_seconds()
 
         # Seconds per -1 point (configurable; comments show defaults).
-        hunger_sec     = float(current_app.config.get('HUNGER_DECAY_SEC', 600.0))     # ~1 every 10m
-        energy_sec     = float(current_app.config.get('ENERGY_DECAY_SEC', 900.0))     # ~1 every 15m
-        happiness_sec  = float(current_app.config.get('HAPPINESS_DECAY_SEC', 1200.0)) # ~1 every 20m
+        hunger_sec     = float(current_app.config.get('HUNGER_DECAY_SEC'))     # ~1 every 10m
+        energy_sec     = float(current_app.config.get('ENERGY_DECAY_SEC'))     # ~1 every 15m
+        happiness_sec  = float(current_app.config.get('HAPPINESS_DECAY_SEC')) # ~1 every 20m
 
         dh = int(elapsed // hunger_sec) if hunger_sec > 0 else 0
         de = int(elapsed // energy_sec) if energy_sec > 0 else 0
@@ -202,8 +202,8 @@ class Pet(db.Model):
           - PET_LEVEL_XP_BASE (default 100)
           - PET_LEVEL_XP_GROWTH (default 1.5)
         """
-        base = current_app.config.get('PET_LEVEL_XP_BASE', 100)
-        growth = current_app.config.get('PET_LEVEL_XP_GROWTH', 1.5)
+        base = current_app.config.get('PET_LEVEL_XP_BASE')
+        growth = current_app.config.get('PET_LEVEL_XP_GROWTH')
         needed = int(round(base * (growth ** (self.level - 1))))
         return max(needed, 1)
 
@@ -218,7 +218,7 @@ class Pet(db.Model):
         if points <= 0:
             return
 
-        max_level = current_app.config.get('PET_MAX_LEVEL', 9)
+        max_level = current_app.config.get('PET_MAX_LEVEL')
         # If already at max, do not accumulate further XP
         if int(self.level) >= int(max_level):
             self.level = int(max_level)

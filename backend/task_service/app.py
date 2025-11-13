@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from flask_cors import CORS
 from config import Config
 from models import db
@@ -18,6 +18,11 @@ def create_app():
     with app.app_context():
         #db.drop_all()
         db.create_all()
+    
+    @app.route("/")
+    def index():
+        return jsonify({'message': 'TASK SERVICE is running ...'}), 200
+
     return app
 
 if __name__ == "__main__":

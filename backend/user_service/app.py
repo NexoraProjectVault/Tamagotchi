@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from models import db
@@ -15,6 +15,10 @@ def create_app():
         db.create_all()
     
     app.register_blueprint(users_bp)
+
+    @app.route("/")
+    def index():
+        return jsonify({'message': 'USER SERVICE is running ...'}), 200
     
     return app
 

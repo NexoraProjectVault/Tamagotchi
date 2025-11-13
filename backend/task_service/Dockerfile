@@ -12,4 +12,9 @@ COPY . .
 
 EXPOSE 5003
 ENV PYTHONUNBUFFERED=1
-CMD ["python", "app.py"]
+ENV PYTHONPATH=/app:/app/shared
+
+
+# CMD ["python", "app.py"]
+
+CMD ["gunicorn", "--bind", "0.0.0.0:5003", "--timeout", "120", "app:create_app()"]

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from models import db
@@ -13,6 +13,10 @@ def create_app():
     
     with app.app_context():
         db.create_all()
+
+    @app.route("/")
+    def index():
+        return jsonify({'message': 'DATA TRACKING SERVICE is running...'}), 200
     
     app.register_blueprint(data_tracking_bp)
     

@@ -32,7 +32,7 @@ import os
 pets_bp = Blueprint('pets', __name__, url_prefix='/api/v1')
 
 # Server-side action cost; keep this in sync with the frontend constant.
-POINT_COST_PER_ACTION = int(os.getenv("POINT_COST_PER_ACTION", "1"))
+POINT_COST_PER_ACTION = int(os.getenv("POINT_COST_PER_ACTION"))
 # Development helper: auto-create a default pet when a user has none.
 #AUTO_CREATE_DEFAULT = os.getenv("AUTO_CREATE_DEFAULT_PET", "true").lower() in {"1", "true", "yes", "y"}
 

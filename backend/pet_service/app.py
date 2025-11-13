@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from models import db
@@ -16,6 +16,12 @@ def create_app():
     
     app.register_blueprint(pets_bp)
     app.register_blueprint(root_bp)
+
+    @app.route("/")
+    def index():
+        return jsonify({'message': 'PET SERVICE is running'}), 200
+
+    return app
     
     return app
 

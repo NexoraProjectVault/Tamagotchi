@@ -7,12 +7,10 @@ load_dotenv()
 class Config:
     # Flask / SQLAlchemy
     DEBUG = os.getenv('DEBUG', 'False') == 'True'
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'PET_DATABASE_URL',
-        'postgresql://postgres:postgres@pet_db:5432/pet_service'
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv('PET_DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = os.getenv('DEBUG', 'False') == 'True'
+    API_GATEWAY_URL = os.getenv('API_GATEWAY_URL')
 
     # XP / level rules
     PET_LEVEL_XP_BASE   = int(os.getenv('PET_LEVEL_XP_BASE', '100'))   # base XP for level 1->2
