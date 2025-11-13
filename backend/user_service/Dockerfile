@@ -17,4 +17,4 @@ ENV PYTHONUNBUFFERED=1
 
 ENV PYTHONPATH=/app:/app/shared
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--timeout", "120", "app:create_app()"]
+CMD ["python", "app.py"]
