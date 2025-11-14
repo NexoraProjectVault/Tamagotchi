@@ -16,7 +16,7 @@ def create_app():
     app.register_blueprint(routes_bp)
 
     with app.app_context():
-        #db.drop_all()
+        db.drop_all()
         db.create_all()
     
     @app.route("/")
