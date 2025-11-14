@@ -13,6 +13,7 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
+        db.drop_all()
         db.create_all()
     
     app.register_blueprint(pets_bp)
@@ -22,8 +23,6 @@ def create_app():
     def index():
         return jsonify({'message': 'PET SERVICE is running'}), 200
 
-    return app
-    
     return app
 
 if __name__ == '__main__':
