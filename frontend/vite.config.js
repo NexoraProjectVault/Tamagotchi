@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'import.meta.env.API_GATEWAY_URL': JSON.stringify(
-      process.env.API_GATEWAY_URL
+      process.env.VITE_API_GATEWAY_URL
     )
   },
   server: {
