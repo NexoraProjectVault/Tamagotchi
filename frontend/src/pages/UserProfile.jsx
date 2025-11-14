@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UserProfile.css";
 
-const baseUrl = import.meta.env.API_GATEWAY_URL; // API Gateway to user service
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL; // API Gateway to user service
 // ^ keep your latest setup :contentReference[oaicite:4]{index=4}
 
 export default function UserProfile() {

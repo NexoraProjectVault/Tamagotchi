@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-const baseUrl = import.meta.env.API_GATEWAY_URL;
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
 export default function Register() {
   const [email, setEmail] = useState("");

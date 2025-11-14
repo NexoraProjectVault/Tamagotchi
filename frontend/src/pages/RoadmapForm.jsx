@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RoadmapForm.css";
 import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
-const baseUrl = import.meta.env.API_GATEWAY_URL;
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 const dataTrackingUrl = `${baseUrl}/v1/data-tracking-service`; // API Gateway to data tracking service
 
 export function getAuthHeaders() {

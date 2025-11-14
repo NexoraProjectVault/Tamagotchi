@@ -14,7 +14,7 @@
 // -----------------------------------------------------------------------------
 
 // --- shared fetch helpers for other components (e.g., PetSnapshotCard) ---
-export const baseUrl = import.meta.env.API_GATEWAY_URL;
+export const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SelectPet.css";
 
-const baseUrl = import.meta.env.API_GATEWAY_URL;
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");

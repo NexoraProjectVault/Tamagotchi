@@ -141,7 +141,7 @@ export default function TasksPageUI() {
   const fetchAndProcessTasks = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.API_GATEWAY_URL;
+      const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
       const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
         method: "GET",
@@ -207,7 +207,7 @@ export default function TasksPageUI() {
   const fetchRoadmaps = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.API_GATEWAY_URL;
+      const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
       const response = await fetch(`${baseUrl}/v1/data-tracking-service/roadmaps`, {
         method: "GET",

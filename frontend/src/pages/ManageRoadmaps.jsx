@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./ManageRoadmaps.css";
 import "./manage-theme.css";
 
-const baseUrl = import.meta.env.API_GATEWAY_URL;
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 const roadmapsUrl = `${baseUrl}/v1/data-tracking-service/roadmaps`;
 
 // Time conversion to UTC date string

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./ManageTasks.css";
 import "./manage-theme.css";
 
-const baseUrl = import.meta.env.API_GATEWAY_URL;
+const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 const taskUrl = `${baseUrl}/v1/task-service/tasks`;
 
 const getAuthHeaders = () => {

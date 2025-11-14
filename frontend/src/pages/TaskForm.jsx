@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./TaskForm.css";
 import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
-const taskServiceUrl = `${import.meta.env.API_GATEWAY_URL}/v1/task-service`; // API Gateway to task service
+const taskServiceUrl = `${import.meta.env.VITE_API_GATEWAY_URL}/v1/task-service`; // API Gateway to task service
 
 export function getAuthHeaders() {
   const token  = localStorage.getItem("access_token");
