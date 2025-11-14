@@ -13,7 +13,16 @@ export default function FloatingMusicToggle() {
     const audio = new Audio(bgMusic);
     audio.loop = true;
     audioRef.current = audio;
-    audio.play().catch(() => {});
+    audio
+      .play()
+      .then(() => {
+        setIsPlaying(true);  
+      })
+      .catch((err) => {
+        console.warn("Autoplay blocked:", err);
+        setIsPlaying(false);  
+      });
+
 
 
     return () => {
