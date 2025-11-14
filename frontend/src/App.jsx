@@ -189,7 +189,7 @@ function UserSection() {
 
     // 2) Always fetch current user to override any stale cache
     const token = localStorage.getItem("access_token");
-    const baseUrl = import.meta.env.API_GATEWAY_URL;
+    const baseUrl = import.meta.env.VITE_API_GATEWAY_URL ;
     if (token) {
       fetch(`${baseUrl}/v1/user-service/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -342,7 +342,7 @@ function HomePage() {
   const fetchAndProcessTasks = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.API_GATEWAY_URL;
+      const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
       const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
         method: "GET",
         headers: getAuthHeaders(),
@@ -580,7 +580,7 @@ function NeglectedSection() {
   const fetchNeglectedTasks = async () => {
     try {
       setLoading(true);
-      const baseUrl = import.meta.env.API_GATEWAY_URL;
+      const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
       const response = await fetch(`${baseUrl}/v1/task-service/tasks`, {
         method: "GET",
         headers: getAuthHeaders(),
@@ -795,7 +795,7 @@ export default function App() {
      const token = localStorage.getItem("access_token");
      if (!token) return; 
 
-     const baseUrl = import.meta.env.API_GATEWAY_URL;
+     const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
      (async () => {
        try {
@@ -877,7 +877,7 @@ export default function App() {
           </div>
           <button
             className="footer-health-btn"
-            onClick={() => window.location.href = `${import.meta.env.API_GATEWAY_URL}/v1/health`}
+            onClick={() => window.location.href = `${import.meta.env.VITE_API_GATEWAY_URL}/v1/health`}
           >
             Health Check
           </button>
