@@ -361,9 +361,21 @@ def _process_event(payload):
           * If metadata.tags[0] is in {"feeding","cleaning","playing"}, also
             increments the corresponding point bucket by the same amount.
     """
+    user_id = payload.get("user_id")
+    if not user_id:
+        return {
+            "error": "missing_user_id",
+            "message": "Event payload must include 'user_id' to attribute points"
+        }, 400
+    
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return {"error": "invalid_user_id", "message": "user_id must be an integer"}, 400
+    
     event_type = (payload.get("type") or "").strip().upper()
     # In production: resolve payload.user_id -> pet.user_id mapping.
-    pet = _get_or_create_user_pet(uid=1)
+    pet = _get_or_create_user_pet(user_id)
 
     if event_type == "TASK_COMPLETED":
         points = int(payload.get("points") or 0)
