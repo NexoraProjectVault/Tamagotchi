@@ -16,6 +16,9 @@ class Events:
     TASK_DELETED = 'task_deleted'
     TASK_RESTORED = 'task_restored'
     TASK_UPDATED = 'task_updated'
+    ROADMAP_CREATED = 'roadmap_created'
+    ROADMAP_UPDATED = 'roadmap_updated'
+    ROADMAP_DELETED = 'roadmap_deleted'
 
 
 class EventClient:
