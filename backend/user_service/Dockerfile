@@ -10,10 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5001
-
 ENV PYTHONUNBUFFERED=1
-#CMD ["python", "app.py"]
 
 ENV PYTHONPATH=/app:/app/shared
 

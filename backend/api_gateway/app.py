@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import requests
@@ -36,9 +37,10 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    port = int(os.getenv('PORT', 5000))
     app.run(
         host='0.0.0.0',
-        port=5000,
+        port=port,
         debug=app.config['DEBUG'],
         threaded=True
     )
