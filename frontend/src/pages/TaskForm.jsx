@@ -1,10 +1,11 @@
 // src/pages/TaskForm.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toUIValue, toBackendValue, isoToDatetimeLocal,datetimeLocalToISO,getToday} from "../components/HelperComponents";
 import "./TaskForm.css";
-import { toUIValue, toBackendValue } from "../components/HelperComponents";
 
 const taskServiceUrl = `${import.meta.env.VITE_API_GATEWAY_URL}/v1/task-service`; // API Gateway to task service
+
 
 export function getAuthHeaders() {
   const token  = localStorage.getItem("access_token");
@@ -14,26 +15,6 @@ export function getAuthHeaders() {
   if (userId) h["X-User-Id"] = userId;
   return h;
 }
-
-// Helper to format ISO date to datetime-local format
-const formatDatetimeLocal = (isoString) => {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-// Helper to convert datetime-local to ISO
-const datetimeLocalToISO = (datetimeLocal) => {
-  if (!datetimeLocal) return null;
-  const date = new Date(datetimeLocal);
-  return date.toISOString();
-};
-
 
 export default function TaskForm() {
   const navigate = useNavigate();
@@ -51,7 +32,6 @@ export default function TaskForm() {
   const [points, setPoints] = useState("");
   const [recurrence, setRecurrence] = useState("");
   const [repeatEnd, setRepeatEnd] = useState("");
-  
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -82,17 +62,15 @@ export default function TaskForm() {
         setRepeatEnd("");
       }
       
-      // Format due datetime for datetime-local input
+      // Convert ISO datetime from backend to datetime-local format for input
       if (editingTask.due_at) {
-        const formattedDatetime = formatDatetimeLocal(editingTask.due_at);
+        const formattedDatetime = isoToDatetimeLocal(editingTask.due_at);
         setDue(formattedDatetime);
-        console.log("📅 Due datetime set to:", formattedDatetime);
+        console.log("📅 Due datetime set to:", formattedDatetime, "from:", editingTask.due_at);
       } else {
-        // Default to tomorrow at 11:59 PM
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(23, 59, 0, 0);
-        const formattedDatetime = formatDatetimeLocal(tomorrow.toISOString());
+        // Default to today at 11:59 PM
+        const isoString = getToday();
+        const formattedDatetime = isoToDatetimeLocal(isoString);
         setDue(formattedDatetime);
         console.log("📅 No due_at, setting default:", formattedDatetime);
       }
@@ -109,11 +87,9 @@ export default function TaskForm() {
       setRecurrence("");
       setRepeatEnd("");
 
-      // Default to tomorrow at 11:59 PM
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(23, 59, 0, 0);
-      const formattedDatetime = formatDatetimeLocal(tomorrow.toISOString());
+      // Default to today at 11:59 PM
+      const isoString = getToday();
+      const formattedDatetime = isoToDatetimeLocal(isoString);
       setDue(formattedDatetime);
       console.log("📅 New task default due date:", formattedDatetime);
     }
@@ -125,7 +101,6 @@ export default function TaskForm() {
     setError(null);
 
     try {
-
       // Convert datetime-local to ISO format
       let dueDate = null;
       if (due) {
@@ -133,13 +108,13 @@ export default function TaskForm() {
         if (!dueDate) {
           throw new Error("Invalid date format");
         }
+        console.log("📤 Converted due date from", due, "to ISO:", dueDate);
       } else {
-        // Default to tomorrow at 11:59 PM
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(23, 59, 0, 0);
-        dueDate = tomorrow.toISOString();
+        // Default to today at 11:59 PM
+        dueDate = getToday();
+        console.log("📤 No due date provided, using default:", dueDate);
       }
+
       const taskData = {
         title: name,
         description: desc,
@@ -162,8 +137,6 @@ export default function TaskForm() {
           taskData.repeat_until = null;
         }
       }
-
-
 
       let response;
 
@@ -366,8 +339,6 @@ export default function TaskForm() {
             )}
           </div>
         )}
-
-
 
         {/* Points */}
         <label className="tf-field">

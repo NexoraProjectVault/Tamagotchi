@@ -6,7 +6,6 @@ import "./manage-theme.css";
 
 const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 const taskUrl = `${baseUrl}/v1/task-service/tasks`;
-
 const getAuthHeaders = () => {
   const token = localStorage.getItem("access_token");
   const userId = localStorage.getItem("user_id");
@@ -32,8 +31,8 @@ export default function ManageTasks() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");//
-  const [tagFilter, setTagFilter] = useState("");//
+  const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [isSearching, setIsSearching] = useState(false); 
   const [view, setView] = useState("all"); 
@@ -93,7 +92,6 @@ export default function ManageTasks() {
       return;
     }
     try{
-      // delete the task given the id
       const response = await fetch(`${taskUrl}/${taskId}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
@@ -255,7 +253,7 @@ export default function ManageTasks() {
 
         <div className="mt-search-wrap">
           <div className="mt-search-inner">
-            <input //search input
+            <input
               className="mt-search-input"
               placeholder="Search Task"
               type="text"
@@ -275,7 +273,7 @@ export default function ManageTasks() {
                   Cancel
                 </button>
               ) : (
-                <button //search button
+                <button
                   className="mt-search-btn"
                   onClick={triggerSearch} 
                 >
@@ -289,7 +287,6 @@ export default function ManageTasks() {
               className="mt-back-btn"
               onClick={() => {
                 setView("all");
-
               }}
             >
               ← Back
@@ -436,9 +433,7 @@ export default function ManageTasks() {
               <div className="mt-item-middle">
                 <span className="mt-due-label">Due:</span>{" "}
                 <span className="mt-due-val">
-                  {task.due_at
-                    ? new Date(task.due_at.split('T')[0] + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : "No due date"}
+                  {formatDatetimeDisplay(task.due_at)}
                 </span>
                 {task.points != null && (
                   <div className="mt-points">Points: {task.points}</div>

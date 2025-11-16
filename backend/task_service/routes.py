@@ -15,18 +15,20 @@ PET_SERVICE_URL = f"{Config.API_GATEWAY_URL}/v1/pet-service"
 PRIORITIES = {"low", "medium", "high"}
 TAG_WHITELIST = {"feeding", "cleaning", "playing"}
 
-# Initialize event client
 event_client = EventClient()
 
 def _truthy(v) -> bool:
     return str(v).lower() in {"1", "true", "yes", "y"}
 
 def parse_iso(dt_str):
+    """Parse ISO datetime string, ensuring UTC timezone."""
     if not dt_str:
         return None
-    dt = datetime.fromisoformat(dt_str)
+    dt = parser.isoparse(dt_str)
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        dt = dt.astimezone(timezone.utc)
     return dt
 
 def _utc_now():
@@ -76,13 +78,11 @@ def create_task():
     # Parse due_at input
     due_at_input = data.get("due_at")
     if due_at_input:
-        due_at = parser.parse(due_at_input)
-        # if due_at <= _utc_now():
-        #     abort(400, "due_at must be in the future (UTC)")
+        due_at = parse_iso(due_at_input)
     else:
-        # Default to tomorrow at midnight UTC
-        tomorrow = _utc_now() + timedelta(days=1)
-        due_at = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Default to today at 11:59 PM UTC
+        today = _utc_now().replace(hour=23, minute=59, second=59, microsecond=0)
+        due_at = today
 
     raw_tags = data.get("tags") or []
     status = (data.get("status") or "").lower()
@@ -102,7 +102,7 @@ def create_task():
             abort(400, f"invalid tag: {tag}; allowed: {sorted(TAG_WHITELIST)}")
         tags_to_save = [tag]
 
-    repeat_every = data.get("repeat_every")  # None | 'daily' | 'weekly' | 'monthly'
+    repeat_every = data.get("repeat_every")
     if repeat_every is not None:
         repeat_every = repeat_every.lower()
         if repeat_every not in {"daily", "weekly", "monthly"}:
@@ -110,7 +110,7 @@ def create_task():
 
     repeat_until = None
     if data.get("repeat_until"):
-        repeat_until = parser.parse(data["repeat_until"])
+        repeat_until = parse_iso(data["repeat_until"])
         if repeat_until <= due_at:
             abort(400, "repeat_until must be after due_at")
 
@@ -123,7 +123,6 @@ def create_task():
         tags=tags_to_save,
         points=int(data.get("points") or 0),
         status=status or "todo",
-
         repeat_every=None,
         is_recurring_template=False,
         repeat_until=None,
@@ -136,14 +135,12 @@ def create_task():
         current_due = due_at
 
         while True:
-  
             if repeat_every == "daily":
                 current_due = current_due + timedelta(days=1)
             elif repeat_every == "weekly":
                 current_due = current_due + timedelta(weeks=1)
             elif repeat_every == "monthly":
                 current_due = current_due + relativedelta(months=1)
-
 
             if current_due > repeat_until:
                 break
@@ -278,9 +275,7 @@ def update_task(task_id):
 
     if "due_at" in data:
         new_due = parse_iso(data["due_at"])
-        new_due = new_due.replace(hour=23, minute=59, second=59)
         t.due_at = new_due
-
 
     if "tags" in data:
         incoming = data["tags"] or [] 
@@ -317,11 +312,10 @@ def update_task(task_id):
         if not val:
             t.repeat_until = None
         else:
-            end_dt = parser.parse(val)
+            end_dt = parse_iso(val)
             if t.due_at and end_dt <= t.due_at:
                 abort(400, "repeat_until must be after due_at")
             t.repeat_until = end_dt
-
 
     db.session.commit()
 
@@ -371,7 +365,6 @@ def complete_task(task_id):
     db.session.commit() 
     return jsonify(t.to_dict()), 200
 
-# soft delete
 @bp.route("/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     uid = current_user_id()
@@ -379,7 +372,6 @@ def delete_task(task_id):
     t.deleted_at = datetime.now(timezone.utc)
     db.session.commit()
 
-    # Emit event to API Gateway
     event_client.emit(Events.TASK_DELETED, {
         "task_id": t.id,
         "title": t.title,
@@ -387,7 +379,6 @@ def delete_task(task_id):
     })
     return "", 204
 
-# restore
 @bp.route("/tasks/<int:task_id>/restore", methods=["POST"])
 def restore_task(task_id):
     uid = current_user_id()
@@ -451,7 +442,7 @@ def detach_tag(task_id, name):
         tags.remove(name)
         t.tags = sorted(tags)
         db.session.commit()
-    return t.to_dict(), 200  # idempotent
+    return t.to_dict(), 200
 
 @bp.route("/tasks/recurring/run", methods=["POST"])
 def run_recurring():
@@ -489,7 +480,7 @@ def run_recurring():
         elif tmpl.repeat_every == "weekly":
             tmpl.next_occurrence_at = tmpl.next_occurrence_at + timedelta(weeks=1)
         elif tmpl.repeat_every == "monthly":
-            tmpl.next_occurrence_at = tmpl.next_occurrence_at + timedelta(days=30)
+            tmpl.next_occurrence_at = tmpl.next_occurrence_at + relativedelta(months=1)
 
     db.session.commit()
     return {
