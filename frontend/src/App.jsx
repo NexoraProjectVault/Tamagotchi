@@ -385,7 +385,7 @@ function HomePage() {
         <Sidebar />
         <main id="home" className="main">
           <div className="hero-block">
-            <h1 className="hero">This Weeks's Tasks</h1>
+            <h1 className="hero">This Week's Tasks</h1>
             <button
               className="edit-solid-btn"
               onClick={() => navigate("/tasks")}
