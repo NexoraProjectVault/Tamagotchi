@@ -8,10 +8,32 @@ const baseUrl = import.meta.env.VITE_API_GATEWAY_URL;
 const roadmapsUrl = `${baseUrl}/v1/data-tracking-service/roadmaps`;
 
 // Time conversion to UTC date string
-const formatUTCDate = (iso) => {
-  if (!iso) return "No due date";
-  return new Date(iso).toLocaleDateString(undefined, { timeZone: "UTC" });
+// Time conversion to UTC date string
+const formatDueDate = (isoString) => {
+  if (!isoString) return "No due date";
+  
+  try {
+    // Extract just the date portion (YYYY-MM-DD) from the ISO string
+    const datePart = isoString.split('T')[0];
+    
+    if (!datePart) return "No due date";
+    
+    // Parse it as UTC to avoid timezone shift
+    const [year, month, day] = datePart.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      timeZone: 'UTC'
+    });
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return "No due date";
+  }
 };
+
 
 
 const getAuthHeaders = () => {
@@ -217,7 +239,7 @@ export default function ManageRoadmaps() {
               <div className="mt-item-middle">
                 <span className="mt-due-label">Due:</span>{" "}
                 <span className="mt-due-val">
-                  {formatUTCDate(roadmap.due_date)}
+                  {formatDueDate(roadmap.due_date)}
                 </span>
               </div>
               <div className="button-container">

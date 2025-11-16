@@ -202,6 +202,12 @@ export default function RoadmapForm() {
     setLoading(true);
     setError(null);
 
+    if (!due) {
+      setError("Due date is required");
+      setLoading(false);
+      return;
+    }
+
     // Check roadmap limit before submitting (only for new roadmaps)
     if (!isEdit && roadmapCount >= 3) {
       setError("Maximum limit of 3 roadmaps reached. Please complete or delete an existing roadmap before creating a new one.");
@@ -210,6 +216,14 @@ export default function RoadmapForm() {
     }
 
     try {
+
+      let dueDateTime = null;
+      if (due) {
+        const [year, month, day] = due.split('-').map(Number);
+        // Create date in UTC to avoid timezone shift
+        dueDateTime = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+      }
+
       const submitData = {
         title: name,
         description: desc,
@@ -314,6 +328,7 @@ export default function RoadmapForm() {
             value={due}
             onChange={(e) => setDue(e.target.value)}
             disabled={loading}
+            required
           />
         </label>
 
