@@ -1,11 +1,10 @@
 <a id="readme-top"></a>
-# Project - Tamagotchi
+# Project - [Tamagotchi](https://tamagotchi-n0y6.onrender.com/)
 
 Team 6 - PixelNova
 
 ### Contributors:
 Collaborators: Joshua Chau, Lynne Liu, Richelle Pereira, Vivian Tu, Kyna Wu, Jingqiao Xiao
-
 
 <details>
   <summary>Table of Contents</summary>
@@ -14,14 +13,16 @@ Collaborators: Joshua Chau, Lynne Liu, Richelle Pereira, Vivian Tu, Kyna Wu, Jin
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#tech-stack">Tech Stack</a></li>
+        <li><a href="#architecture-overview">Architecture Overview</a></li>
       </ul>
     </li>
-    <li>
-       <a href="#getting-started">Getting Started</a>
-    </li>
+    <li><a href="#project-structure">Project Structure</a></li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li><a href="#teaser-video">Teaser Video</a></li>
     <li><a href="#contributing">Contributing</a></li>
   </ol>
 </details>
+
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -37,9 +38,11 @@ Key Features:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
 <!-- Tech Stack -->
 ## Tech Stack
 Application is built using: 
+
 <!-- Badge URLs -->
 [![React][React.js]][React-url] [![Javascript][Javascript.com]][Javascript-url] [![Python][Python.org]][Python-url] [![Flask][Flask.com]][Flask-url] [![Docker][Docker.com]][Docker-url] [![Vite][Vitejs.dev]][Vite-url]
 
@@ -62,58 +65,114 @@ Application is built using:
 [Vitejs.dev]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E
 [Vite-url]: https://vitejs.dev/
 
-Note - Application is currently set for development and not prod.
+> Note - Application is currently set for development and not prod.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+## Architecture Overview
+
+Pixel Pet is implemented as a **microservices-based web application** orchestrated with Docker and an API gateway.
+
+### Frontend
+
+- **React + Vite SPA (`/frontend`)**
+  - Handles routing between login, registration, dashboard, pet view, and account/profile pages.
+  - Communicates only with the **API Gateway** (no direct calls to individual services).
+  - Uses `VITE_BACKEND_URL` (e.g. `http://localhost:5000` in dev, or the deployed API URL in prod) to configure the API base URL.
+
+### Backend Services
+
+All backend services are written with **Flask** and are accessed by the frontend through the API Gateway:
+
+- **API Gateway**
+  - Single entry point for the frontend.
+  - Routes requests to the appropriate backend services.
+  - Central place to handle authentication, error handling, and CORS.
+
+- **User Service**
+  - Handles user registration, login, and authentication logic.
+  - Stores and returns user profiles (e.g., name, email, phone, address).
+  - Provides endpoints such as `/users/me` for retrieving the currently authenticated user.
+
+- **Pet Service**
+  - Manages pet state (level, experience, mood, etc.).
+  - Updates pet attributes whenever tasks are completed.
+  - Designed so future cosmetic upgrades (e.g., skins, accessories) can be layered on top.
+
+- **Task Service**
+  - Core CRUD for tasks (create, read, update, delete).
+  - Supports recurring tasks (daily / weekly / monthly) and completion status.
+  - Integrates with the Pet Service and Data Tracking Service on task completion.
+
+- **Data Tracking Service**
+  - Tracks user events like task completion and streaks.
+  - Provides a foundation for future analytical views such as weekly productivity and habit streaks.
+
+### Data & Persistence
+
+- Each service uses its **own database** (e.g., user DB, task DB, pet DB, tracking DB) to keep data bounded to each service.
+- Database connection strings (e.g., `USER_DATABASE_URL`, `TASK_DATABASE_URL`, etc.) are configured via environment variables.
+- This separation supports independent scaling and better fault isolation between services.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 ## Project Structure
 ```bash
-
-├── frontend/
-├── public/                           # Static assets
-│   ├── src/                          # Source code
-│   ├── .dockerignore                
-│   ├── .gitignore                   
-│   ├── Dockerfile                    # Frontend Docker configuration
-│   ├── eslint.config.js              
-│   ├── index.html                    # HTML entry point
-│   ├── package.json                  # Project dependencies
-│   ├── package-lock.json             
-│   └── vite.config.js               
-├── backend/                          # Backend services
-│   ├── api-gateway/                  # API Gateway service
-│   │     ├──...
-│   ├── pet-service/                  # Pet service
-│   │     ├──...
-│   └── user-service/                 # User service
-│         ├──...
-|         └──...
+├── frontend/                        # React + Vite SPA
+│   ├── public/                      # Static assets
+│   ├── src/                         # Source code (pages, components, hooks)
+│   ├── .dockerignore
+│   ├── .gitignore
+│   ├── Dockerfile                   # Frontend Docker configuration
+│   ├── eslint.config.js
+│   ├── index.html                   # HTML entry point
+│   ├── package.json                 # Frontend dependencies
+│   ├── package-lock.json
+│   └── vite.config.js
 │
-├── .dockerignore                    
-├── .gitignore                        
-├── CODE_OF_CONDUCT.md                
-├── CONTRIBUTING.md                  
-├── Dockerfile                        # Root Docker configuration
-├── README.md                         # Project documentation
-├── docker-compose.yml                # Docker Compose configuration
-└── requirements.txt                 
-
+├── backend/                         # Backend services (Flask microservices)
+│   ├── api-gateway/                 # API Gateway service (main entrypoint)
+│   ├── user-service/                # User service (auth & profile)
+│   ├── pet-service/                 # Pet service (pet state & evolution)
+│   ├── task-service/                # Task service (CRUD & recurrence)
+│   ├── data-tracking-service/       # Data tracking / analytics foundation
+│   └── shared/                      # Shared utilities/models between services (if any)
+│
+├── .dockerignore
+├── .gitignore
+├── CODE_OF_CONDUCT.md               # Code of conduct for collaborators
+├── CONTRIBUTING.md                  # Contribution guidelines
+├── Dockerfile                       # Root Docker configuration (if used)
+├── README.md                        # Project documentation (this file)
+├── docker-compose.yml               # Docker Compose configuration (all services)
+└── requirements.txt                 # Python dependency list (for backend)
 ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
 To start application locally:
-1. Clone repository.
+1. Clone repository
 2. Create a virtual environment, activate the virtual environment and run `pip install -r requirements.txt`
-3. Add the .env file in project root directory
-4. Start Docker.
-5. In terminal, in project directory, to build containers and start services: `docker-compose up -d --build`
-6. Once services have started, navigate to the container and checkout frontend endpoints and api-gateway endpoints.
+3. Add a .env file in project root directory
+4. Start Docker
+5. Build containers and start services: `docker-compose up -d --build` in a terminal in the project directory 
+6. Once services have started, navigate to the container and checkout frontend endpoints and api-gateway endpoints
 
 Extras:
 - If any service is modified, only rebuild and restart that service: `docker-compose up -d --build <service-name>`
 - To stop all services (i.e. docker containers): `docker-compose down` or if specific service: `docker-compose down <service-name>`
 - To start services (i.e. containers): `docker-compose up -d` or if specific service: `docker-compose up -d <service-name>`
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- TEASER VIDEO -->
+## Teaser Video
+Here is a [teaser video](https://drive.google.com/file/d/1xSD2XLhvUd3MN2xNaXCTKFmk4M2huoqG/view?usp=sharing) to help getting start with PixelPals! Enjoy!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
